@@ -1,0 +1,11 @@
+vehicle_age,mileage_km,engine_temperature,oil_condition,brake_condition,tire_pressure,battery_condition,days_since_service,maintenance_status
+3,45000,82,Good,Good,34,Good,20,Healthy
+5,120000,96,Fair,Fair,30,Fair,95,Needs Maintenance Soon
+9,250000,112,Poor,Poor,25,Poor,180,Critical Issue
+2,30000,79,Good,Good,35,Good,12,Healthy
+7,175000,101,Fair,Poor,28,Fair,120,Critical Issue
+4,85000,88,Good,Fair,32,Good,60,Needs Maintenance Soon
+10,290000,118,Poor,Poor,24,Poor,210,Critical Issue
+6,140000,94,Fair,Good,31,Fair,80,Needs Maintenance Soon
+1,18000,76,Good,Good,36,Good,8,Healthy
+8,210000,108,Poor,Fair,27,Poor,160,Critical Issue

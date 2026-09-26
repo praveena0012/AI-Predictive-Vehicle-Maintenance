@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BusPredict - Maintenance Alerts</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #172b4d;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            background: #203b6b;
+            color: white;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 25px 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #cbd6eb;
+            margin-bottom: 35px;
+        }
+
+        .menu a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 13px 15px;
+            margin-bottom: 8px;
+            border-radius: 7px;
+        }
+
+        .menu a:hover,
+        .menu .active {
+            background: #31558f;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+            margin-left: 240px;
+            padding: 30px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .header p {
+            color: #60708d;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           SUMMARY CARDS
+        ========================= */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-top: 25px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px #d8dfeb;
+        }
+
+        .summary-title {
+            font-size: 14px;
+            color: #60708d;
+            margin-bottom: 10px;
+        }
+
+        .summary-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        /* =========================
+           CARD
+        ========================= */
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 24px;
+            margin-top: 25px;
+            box-shadow: 0 2px 10px #d8dfeb;
+        }
+
+        /* =========================
+           FILTERS
+        ========================= */
+
+        .filters {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .filters input,
+        .filters select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #ccd5e5;
+            border-radius: 6px;
+            background: white;
+        }
+
+        /* =========================
+           TABLE
+        ========================= */
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1100px;
+        }
+
+        th {
+            background: #203b6b;
+            color: white;
+            padding: 13px 12px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 13px 12px;
+            border-bottom: 1px solid #e1e7f0;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        tbody tr:hover {
+            background: #f8faff;
+        }
+
+        /* =========================
+           BADGES
+        ========================= */
+
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .risk-high {
+            background: #fdeaea;
+            color: #c62828;
+        }
+
+        .risk-medium {
+            background: #fff3df;
+            color: #c56b00;
+        }
+
+        .risk-low {
+            background: #e7f6eb;
+            color: #16803c;
+        }
+
+        .status-open {
+            background: #fff3df;
+            color: #c56b00;
+        }
+
+        .status-resolved {
+            background: #e7f6eb;
+            color: #16803c;
+        }
+
+        /* =========================
+           BUTTON
+        ========================= */
+
+        .resolve-btn {
+            background: #16803c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .resolve-btn:hover {
+            background: #116b32;
+        }
+
+        .resolved-text {
+            color: #16803c;
+            font-weight: bold;
+        }
+
+        .empty-message {
+            padding: 30px;
+            text-align: center;
+            color: #60708d;
+        }
+
+        .error-message {
+            padding: 15px;
+            background: #fdeaea;
+            color: #c62828;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media(max-width: 1000px) {
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width: 700px) {
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <div class="sidebar">
+
+        <div class="logo">
+            BusPredict
+        </div>
+
+        <div class="subtitle">
+            AI Predictive Maintenance
+        </div>
+
+        <div class="menu">
+
+            <a href="dashboard.html">
+                Dashboard
+            </a>
+
+            <a href="buses.html">
+                Buses
+            </a>
+
+            <a href="index.html">
+                Smart Inspection
+            </a>
+
+            <a href="inspection_history.html">
+                Inspection History
+            </a>
+
+            <a href="maintenance_alert.html" class="active">
+                Maintenance Alerts
+            </a>
+
+            <a href="maintenance_records.html">
+                Maintenance Records
+            </a>
+
+            <a href="reports.html">
+                Reports
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <div class="main">
+
+        <div class="header">
+
+            <h1>
+                Maintenance Alerts
+            </h1>
+
+            <p>
+                Review maintenance alerts automatically generated
+                from AI-based bus inspections.
+            </p>
+
+        </div>
+
+
+        <!-- =========================
+             SUMMARY
+        ========================== -->
+
+        <div class="summary-grid">
+
+            <div class="summary-card">
+                <div class="summary-title">
+                    Total Alerts
+                </div>
+
+                <div
+                    id="totalAlerts"
+                    class="summary-value">
+                    0
+                </div>
+            </div>
+
+
+            <div class="summary-card">
+                <div class="summary-title">
+                    Open Alerts
+                </div>
+
+                <div
+                    id="openAlerts"
+                    class="summary-value">
+                    0
+                </div>
+            </div>
+
+
+            <div class="summary-card">
+                <div class="summary-title">
+                    High Risk
+                </div>
+
+                <div
+                    id="highRiskAlerts"
+                    class="summary-value">
+                    0
+                </div>
+            </div>
+
+
+            <div class="summary-card">
+                <div class="summary-title">
+                    Resolved
+                </div>
+
+                <div
+                    id="resolvedAlerts"
+                    class="summary-value">
+                    0
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             ALERT LIST
+        ========================== -->
+
+        <div class="card">
+
+            <h2>
+                Generated Maintenance Alerts
+            </h2>
+
+            <div class="filters">
+
+                <input
+                    id="searchInput"
+                    type="text"
+                    placeholder="Search bus or registration">
+
+                <select id="riskFilter">
+
+                    <option value="">
+                        All Risk Levels
+                    </option>
+
+                    <option value="High">
+                        High
+                    </option>
+
+                    <option value="Medium">
+                        Medium
+                    </option>
+
+                </select>
+
+
+                <select id="statusFilter">
+
+                    <option value="">
+                        All Status
+                    </option>
+
+                    <option value="Open">
+                        Open
+                    </option>
+
+                    <option value="Resolved">
+                        Resolved
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div id="errorContainer"></div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Alert ID</th>
+                            <th>Bus</th>
+                            <th>Registration</th>
+                            <th>Inspection</th>
+                            <th>Date</th>
+                            <th>Risk</th>
+                            <th>Probability</th>
+                            <th>Message</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="alertTableBody">
+
+                        <tr>
+                            <td colspan="10">
+                                Loading maintenance alerts...
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script>
+
+        const API_URL =
+            "http://127.0.0.1:8000";
+
+
+        let maintenanceAlerts = [];
+
+
+        const tableBody =
+            document.getElementById(
+                "alertTableBody"
+            );
+
+
+        const searchInput =
+            document.getElementById(
+                "searchInput"
+            );
+
+
+        const riskFilter =
+            document.getElementById(
+                "riskFilter"
+            );
+
+
+        const statusFilter =
+            document.getElementById(
+                "statusFilter"
+            );
+
+
+        /* =========================
+           LOAD ALERTS
+        ========================== */
+
+        async function loadAlerts() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_URL}/alerts`
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Unable to load maintenance alerts."
+                    );
+
+                }
+
+
+                maintenanceAlerts =
+                    await response.json();
+
+
+                updateSummary();
+
+                displayAlerts(
+                    maintenanceAlerts
+                );
+
+
+                document.getElementById(
+                    "errorContainer"
+                ).innerHTML = "";
+
+
+            } catch (error) {
+
+                console.error(error);
+
+
+                document.getElementById(
+                    "errorContainer"
+                ).innerHTML = `
+
+                    <div class="error-message">
+
+                        Unable to load maintenance alerts.
+
+                        Make sure the BusPredict backend
+                        is running on port 8000.
+
+                    </div>
+
+                `;
+
+
+                tableBody.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="10"
+                            class="empty-message">
+
+                            No alert data available.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+        }
+
+
+        /* =========================
+           SUMMARY CARDS
+        ========================== */
+
+        function updateSummary() {
+
+            const total =
+                maintenanceAlerts.length;
+
+
+            const open =
+                maintenanceAlerts.filter(
+                    alert =>
+                        alert.status === "Open"
+                ).length;
+
+
+            const high =
+                maintenanceAlerts.filter(
+                    alert =>
+                        alert.risk_level === "High"
+                ).length;
+
+
+            const resolved =
+                maintenanceAlerts.filter(
+                    alert =>
+                        alert.status === "Resolved"
+                ).length;
+
+
+            document.getElementById(
+                "totalAlerts"
+            ).textContent = total;
+
+
+            document.getElementById(
+                "openAlerts"
+            ).textContent = open;
+
+
+            document.getElementById(
+                "highRiskAlerts"
+            ).textContent = high;
+
+
+            document.getElementById(
+                "resolvedAlerts"
+            ).textContent = resolved;
+
+        }
+
+
+        /* =========================
+           DISPLAY ALERTS
+        ========================== */
+
+        function displayAlerts(alerts) {
+
+            tableBody.innerHTML = "";
+
+
+            if (alerts.length === 0) {
+
+                tableBody.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="10"
+                            class="empty-message">
+
+                            No maintenance alerts found.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+                return;
+
+            }
+
+
+            alerts.forEach(
+
+                function(alert) {
+
+                    const row =
+                        document.createElement(
+                            "tr"
+                        );
+
+
+                    /* Risk badge */
+
+                    let riskClass =
+                        "risk-medium";
+
+
+                    if (
+                        alert.risk_level ===
+                        "High"
+                    ) {
+
+                        riskClass =
+                            "risk-high";
+
+                    } else if (
+                        alert.risk_level ===
+                        "Low"
+                    ) {
+
+                        riskClass =
+                            "risk-low";
+
+                    }
+
+
+                    /* Status badge */
+
+                    const statusClass =
+                        alert.status === "Resolved"
+                            ? "status-resolved"
+                            : "status-open";
+
+
+                    /* Action */
+
+                    let actionHTML;
+
+
+                    if (
+                        alert.status === "Open"
+                    ) {
+
+                        actionHTML = `
+
+                            <button
+                                class="resolve-btn"
+                                onclick="resolveAlert(${alert.alert_id})">
+
+                                Resolve
+
+                            </button>
+
+                        `;
+
+                    } else {
+
+                        actionHTML = `
+
+                            <span class="resolved-text">
+                                Resolved
+                            </span>
+
+                        `;
+
+                    }
+
+
+                    /* Date */
+
+                    let formattedDate = "-";
+
+
+                    if (alert.created_at) {
+
+                        const date =
+                            new Date(
+                                alert.created_at
+                            );
+
+
+                        formattedDate =
+                            date.toLocaleString();
+
+                    }
+
+
+                    row.innerHTML = `
+
+                        <td>
+                            #${alert.alert_id}
+                        </td>
+
+                        <td>
+                            <strong>
+                                ${alert.bus_number}
+                            </strong>
+                        </td>
+
+                        <td>
+                            ${alert.registration_number}
+                        </td>
+
+                        <td>
+                            #${alert.inspection_id}
+                        </td>
+
+                        <td>
+                            ${formattedDate}
+                        </td>
+
+                        <td>
+
+                            <span
+                                class="badge ${riskClass}">
+
+                                ${alert.risk_level}
+
+                            </span>
+
+                        </td>
+
+                        <td>
+                            ${alert.maintenance_probability}%
+                        </td>
+
+                        <td>
+                            ${alert.message}
+                        </td>
+
+                        <td>
+
+                            <span
+                                class="badge ${statusClass}">
+
+                                ${alert.status}
+
+                            </span>
+
+                        </td>
+
+                        <td>
+                            ${actionHTML}
+                        </td>
+
+                    `;
+
+
+                    tableBody.appendChild(
+                        row
+                    );
+
+                }
+
+            );
+
+        }
+
+
+        /* =========================
+           RESOLVE ALERT
+        ========================== */
+
+        async function resolveAlert(
+            alertId
+        ) {
+
+            const confirmed =
+                confirm(
+                    "Mark this maintenance alert as resolved?"
+                );
+
+
+            if (!confirmed) {
+
+                return;
+
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+
+                        `${API_URL}/alerts/${alertId}/resolve`,
+
+                        {
+                            method: "PATCH"
+                        }
+
+                    );
+
+
+                const result =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        result.detail ||
+                        "Unable to resolve alert."
+                    );
+
+                }
+
+
+                alert(
+                    "Maintenance alert resolved successfully."
+                );
+
+
+                await loadAlerts();
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    error.message
+                );
+
+            }
+
+        }
+
+
+        /* =========================
+           FILTER ALERTS
+        ========================== */
+
+        function filterAlerts() {
+
+            const search =
+                searchInput.value
+                    .toLowerCase()
+                    .trim();
+
+
+            const selectedRisk =
+                riskFilter.value;
+
+
+            const selectedStatus =
+                statusFilter.value;
+
+
+            const filtered =
+                maintenanceAlerts.filter(
+
+                    function(alert) {
+
+                        const bus =
+                            String(
+                                alert.bus_number
+                            ).toLowerCase();
+
+
+                        const registration =
+                            String(
+                                alert.registration_number
+                            ).toLowerCase();
+
+
+                        const matchesSearch =
+                            bus.includes(search) ||
+                            registration.includes(search);
+
+
+                        const matchesRisk =
+                            selectedRisk === "" ||
+                            alert.risk_level ===
+                                selectedRisk;
+
+
+                        const matchesStatus =
+                            selectedStatus === "" ||
+                            alert.status ===
+                                selectedStatus;
+
+
+                        return (
+                            matchesSearch &&
+                            matchesRisk &&
+                            matchesStatus
+                        );
+
+                    }
+
+                );
+
+
+            displayAlerts(
+                filtered
+            );
+
+        }
+
+
+        /* =========================
+           FILTER EVENTS
+        ========================== */
+
+        searchInput.addEventListener(
+            "input",
+            filterAlerts
+        );
+
+
+        riskFilter.addEventListener(
+            "change",
+            filterAlerts
+        );
+
+
+        statusFilter.addEventListener(
+            "change",
+            filterAlerts
+        );
+
+
+        /* =========================
+           PAGE LOAD
+        ========================== */
+
+        document.addEventListener(
+
+            "DOMContentLoaded",
+
+            function() {
+
+                loadAlerts();
+
+            }
+
+        );
+
+    </script>
+
+</body>
+
+</html>

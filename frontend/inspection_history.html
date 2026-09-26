@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BusPredict - Inspection History</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #172b4d;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            background: #203b6b;
+            color: white;
+
+            position: fixed;
+            left: 0;
+            top: 0;
+
+            padding: 25px 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #cbd6eb;
+            margin-bottom: 35px;
+        }
+
+        .menu a {
+            display: block;
+            color: white;
+            text-decoration: none;
+
+            padding: 13px 15px;
+            margin-bottom: 8px;
+
+            border-radius: 7px;
+        }
+
+        .menu a:hover,
+        .menu .active {
+            background: #31558f;
+        }
+
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+            margin-left: 240px;
+            padding: 30px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .header p {
+            color: #60708d;
+        }
+
+
+        /* =========================
+           SUMMARY CARDS
+        ========================= */
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px #d8dfeb;
+        }
+
+        .summary-title {
+            color: #60708d;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+
+        /* =========================
+           CARD
+        ========================= */
+
+        .card {
+            background: white;
+
+            border-radius: 10px;
+
+            padding: 24px;
+            margin-top: 25px;
+
+            box-shadow: 0 2px 10px #d8dfeb;
+        }
+
+
+        /* =========================
+           FILTER AREA
+        ========================= */
+
+        .filters {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .filters input,
+        .filters select {
+            width: 100%;
+            padding: 11px;
+
+            border: 1px solid #ccd5e5;
+            border-radius: 6px;
+
+            background: white;
+        }
+
+
+        /* =========================
+           TABLE
+        ========================= */
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #203b6b;
+            color: white;
+            text-align: left;
+
+            padding: 13px;
+
+            font-size: 13px;
+        }
+
+        td {
+            padding: 13px;
+
+            border-bottom: 1px solid #e2e7ef;
+
+            font-size: 13px;
+        }
+
+        tbody tr:hover {
+            background: #f6f8fc;
+        }
+
+
+        /* =========================
+           BADGES
+        ========================= */
+
+        .badge {
+            display: inline-block;
+
+            padding: 5px 9px;
+
+            border-radius: 15px;
+
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .risk-low {
+            background: #e4f5e9;
+            color: #16803c;
+        }
+
+        .risk-medium {
+            background: #fff3d9;
+            color: #b36b00;
+        }
+
+        .risk-high {
+            background: #fde5e5;
+            color: #c62828;
+        }
+
+        .status-good {
+            color: #16803c;
+            font-weight: bold;
+        }
+
+        .status-maintenance {
+            color: #c62828;
+            font-weight: bold;
+        }
+
+
+        /* =========================
+           EMPTY / ERROR
+        ========================= */
+
+        .message {
+            padding: 30px;
+            text-align: center;
+            color: #60708d;
+        }
+
+        .error {
+            color: #c62828;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media(max-width: 1000px) {
+
+            .summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width: 700px) {
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+
+    <!-- ===============================
+         SIDEBAR
+    ================================ -->
+
+    <div class="sidebar">
+
+        <div class="logo">
+            BusPredict
+        </div>
+
+        <div class="subtitle">
+            AI Predictive Maintenance
+        </div>
+
+
+        <div class="menu">
+
+    <a href="dashboard.html">
+        Dashboard
+    </a>
+
+    <a href="buses.html">
+        Buses
+    </a>
+
+    <a href="index.html">
+        Smart Inspection
+    </a>
+
+    <a href="inspection_history.html" class="active">
+        Inspection History
+    </a>
+
+    <a href="maintenance_alert.html">
+        Maintenance Alerts
+    </a>
+
+    <a href="maintenance_records.html">
+        Maintenance Records
+    </a>
+
+    <a href="reports.html">
+        Reports
+    </a>
+
+</div>
+    </div>
+
+
+    <!-- ===============================
+         MAIN CONTENT
+    ================================ -->
+
+    <div class="main">
+
+
+        <div class="header">
+
+            <h1>
+                Inspection History
+            </h1>
+
+            <p>
+                View AI-assisted maintenance inspections
+                completed for registered buses.
+            </p>
+
+        </div>
+
+
+        <!-- ===============================
+             SUMMARY
+        ================================ -->
+
+        <div class="summary">
+
+            <div class="summary-card">
+
+                <div class="summary-title">
+                    Total Inspections
+                </div>
+
+                <div
+                    id="totalInspections"
+                    class="summary-value">
+
+                    0
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-title">
+                    Low Risk
+                </div>
+
+                <div
+                    id="lowRisk"
+                    class="summary-value">
+
+                    0
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-title">
+                    Medium Risk
+                </div>
+
+                <div
+                    id="mediumRisk"
+                    class="summary-value">
+
+                    0
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-title">
+                    High Risk
+                </div>
+
+                <div
+                    id="highRisk"
+                    class="summary-value">
+
+                    0
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===============================
+             HISTORY TABLE
+        ================================ -->
+
+        <div class="card">
+
+            <h2>
+                Saved Inspections
+            </h2>
+
+
+            <!-- FILTERS -->
+
+            <div class="filters">
+
+                <input
+                    id="searchInput"
+                    type="text"
+                    placeholder="Search bus or registration...">
+
+
+                <select id="riskFilter">
+
+                    <option value="">
+                        All Risk Levels
+                    </option>
+
+                    <option value="Low">
+                        Low
+                    </option>
+
+                    <option value="Medium">
+                        Medium
+                    </option>
+
+                    <option value="High">
+                        High
+                    </option>
+
+                </select>
+
+
+                <select id="statusFilter">
+
+                    <option value="">
+                        All Maintenance Status
+                    </option>
+
+                    <option value="No Maintenance Required">
+                        No Maintenance Required
+                    </option>
+
+                    <option value="Maintenance Required">
+                        Maintenance Required
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- TABLE -->
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                ID
+                            </th>
+
+                            <th>
+                                Bus
+                            </th>
+
+                            <th>
+                                Registration
+                            </th>
+
+                            <th>
+                                Date
+                            </th>
+
+                            <th>
+                                Maintenance Status
+                            </th>
+
+                            <th>
+                                Risk
+                            </th>
+
+                            <th>
+                                Probability
+                            </th>
+
+                            <th>
+                                AI Model
+                            </th>
+
+                            <th>
+                                Recommendation
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="inspectionTable">
+
+                        <tr>
+
+                            <td
+                                colspan="9"
+                                class="message">
+
+                                Loading inspection history...
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===============================
+         JAVASCRIPT
+    ================================ -->
+
+    <script>
+
+
+        const API_URL =
+            "http://127.0.0.1:8000";
+
+
+        let inspections = [];
+
+
+        const inspectionTable =
+            document.getElementById(
+                "inspectionTable"
+            );
+
+
+        const searchInput =
+            document.getElementById(
+                "searchInput"
+            );
+
+
+        const riskFilter =
+            document.getElementById(
+                "riskFilter"
+            );
+
+
+        const statusFilter =
+            document.getElementById(
+                "statusFilter"
+            );
+
+
+        /* ===============================
+           LOAD INSPECTIONS
+        ================================ */
+
+        async function loadInspections() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_URL}/inspections`
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Unable to load inspection history."
+                    );
+
+                }
+
+
+                inspections =
+                    await response.json();
+
+
+                updateSummary();
+
+                displayInspections(
+                    inspections
+                );
+
+
+            } catch (error) {
+
+                console.error(error);
+
+
+                inspectionTable.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="9"
+                            class="message error">
+
+                            Unable to load inspection history.
+
+                            <br><br>
+
+                            Make sure the BusPredict FastAPI
+                            server is running on port 8000.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+        }
+
+
+        /* ===============================
+           UPDATE SUMMARY
+        ================================ */
+
+        function updateSummary() {
+
+            const total =
+                inspections.length;
+
+
+            const low =
+                inspections.filter(
+                    function(item) {
+
+                        return (
+                            item.risk_level ===
+                            "Low"
+                        );
+
+                    }
+                ).length;
+
+
+            const medium =
+                inspections.filter(
+                    function(item) {
+
+                        return (
+                            item.risk_level ===
+                            "Medium"
+                        );
+
+                    }
+                ).length;
+
+
+            const high =
+                inspections.filter(
+                    function(item) {
+
+                        return (
+                            item.risk_level ===
+                            "High"
+                        );
+
+                    }
+                ).length;
+
+
+            document.getElementById(
+                "totalInspections"
+            ).textContent =
+                total;
+
+
+            document.getElementById(
+                "lowRisk"
+            ).textContent =
+                low;
+
+
+            document.getElementById(
+                "mediumRisk"
+            ).textContent =
+                medium;
+
+
+            document.getElementById(
+                "highRisk"
+            ).textContent =
+                high;
+
+        }
+
+
+        /* ===============================
+           DISPLAY INSPECTIONS
+        ================================ */
+
+        function displayInspections(data) {
+
+
+            if (data.length === 0) {
+
+                inspectionTable.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="9"
+                            class="message">
+
+                            No inspection records found.
+
+                            Complete a Smart Inspection
+                            to create the first record.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+                return;
+
+            }
+
+
+            inspectionTable.innerHTML =
+                "";
+
+
+            data.forEach(
+                function(item) {
+
+
+                    let riskClass = "";
+
+
+                    if (
+                        item.risk_level ===
+                        "Low"
+                    ) {
+
+                        riskClass =
+                            "risk-low";
+
+                    }
+
+                    else if (
+                        item.risk_level ===
+                        "Medium"
+                    ) {
+
+                        riskClass =
+                            "risk-medium";
+
+                    }
+
+                    else if (
+                        item.risk_level ===
+                        "High"
+                    ) {
+
+                        riskClass =
+                            "risk-high";
+
+                    }
+
+
+                    let statusClass =
+                        "status-good";
+
+
+                    if (
+                        item.maintenance_status ===
+                        "Maintenance Required"
+                    ) {
+
+                        statusClass =
+                            "status-maintenance";
+
+                    }
+
+
+                    const date =
+                        formatDate(
+                            item.inspection_date
+                        );
+
+
+                    const row =
+                        document.createElement(
+                            "tr"
+                        );
+
+
+                    row.innerHTML = `
+
+                        <td>
+                            #${item.inspection_id}
+                        </td>
+
+
+                        <td>
+                            <strong>
+                                ${item.bus_number}
+                            </strong>
+                        </td>
+
+
+                        <td>
+                            ${item.registration_number}
+                        </td>
+
+
+                        <td>
+                            ${date}
+                        </td>
+
+
+                        <td
+                            class="${statusClass}">
+
+                            ${item.maintenance_status}
+
+                        </td>
+
+
+                        <td>
+
+                            <span
+                                class="badge ${riskClass}">
+
+                                ${item.risk_level}
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            ${item.maintenance_probability}%
+
+                        </td>
+
+
+                        <td>
+
+                            ${item.model}
+
+                        </td>
+
+
+                        <td>
+
+                            ${item.recommendation}
+
+                        </td>
+
+                    `;
+
+
+                    inspectionTable.appendChild(
+                        row
+                    );
+
+                }
+            );
+
+        }
+
+
+        /* ===============================
+           FORMAT DATE
+        ================================ */
+
+        function formatDate(dateValue) {
+
+
+            if (!dateValue) {
+
+                return "-";
+
+            }
+
+
+            const date =
+                new Date(
+                    dateValue
+                );
+
+
+            if (
+                Number.isNaN(
+                    date.getTime()
+                )
+            ) {
+
+                return dateValue;
+
+            }
+
+
+            return date.toLocaleString();
+
+        }
+
+
+        /* ===============================
+           FILTER INSPECTIONS
+        ================================ */
+
+        function filterInspections() {
+
+
+            const search =
+                searchInput
+                    .value
+                    .toLowerCase()
+                    .trim();
+
+
+            const risk =
+                riskFilter.value;
+
+
+            const status =
+                statusFilter.value;
+
+
+            const filtered =
+                inspections.filter(
+                    function(item) {
+
+
+                        const busNumber =
+                            String(
+                                item.bus_number || ""
+                            ).toLowerCase();
+
+
+                        const registration =
+                            String(
+                                item.registration_number || ""
+                            ).toLowerCase();
+
+
+                        const matchesSearch =
+                            busNumber.includes(
+                                search
+                            )
+                            ||
+                            registration.includes(
+                                search
+                            );
+
+
+                        const matchesRisk =
+                            risk === ""
+                            ||
+                            item.risk_level ===
+                            risk;
+
+
+                        const matchesStatus =
+                            status === ""
+                            ||
+                            item.maintenance_status ===
+                            status;
+
+
+                        return (
+                            matchesSearch
+                            &&
+                            matchesRisk
+                            &&
+                            matchesStatus
+                        );
+
+                    }
+                );
+
+
+            displayInspections(
+                filtered
+            );
+
+        }
+
+
+        /* ===============================
+           FILTER EVENTS
+        ================================ */
+
+        searchInput.addEventListener(
+            "input",
+            filterInspections
+        );
+
+
+        riskFilter.addEventListener(
+            "change",
+            filterInspections
+        );
+
+
+        statusFilter.addEventListener(
+            "change",
+            filterInspections
+        );
+
+
+        /* ===============================
+           PAGE LOAD
+        ================================ */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+
+            function() {
+
+                loadInspections();
+
+            }
+        );
+
+
+    </script>
+
+</body>
+
+</html>

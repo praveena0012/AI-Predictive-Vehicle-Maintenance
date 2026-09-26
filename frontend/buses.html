@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BusPredict - Bus Management</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #172b4d;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            background: #203b6b;
+            color: white;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 25px 20px;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #cbd6eb;
+            margin-bottom: 35px;
+        }
+
+        .menu a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 13px 15px;
+            margin-bottom: 8px;
+            border-radius: 7px;
+        }
+
+        .menu a:hover,
+        .menu .active {
+            background: #31558f;
+        }
+
+
+        /* =========================
+           MAIN CONTENT
+        ========================= */
+
+        .main {
+            margin-left: 240px;
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .header p {
+            color: #60708d;
+        }
+
+
+        /* =========================
+           ADD BUTTON
+        ========================= */
+
+        .add-btn {
+            background: #e87922;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 7px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .add-btn:hover {
+            background: #cf6418;
+        }
+
+
+        /* =========================
+           CARD
+        ========================= */
+
+        .card {
+            background: white;
+            padding: 24px;
+            margin-top: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px #d8dfeb;
+            overflow-x: auto;
+        }
+
+
+        /* =========================
+           FILTERS
+        ========================= */
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filters input,
+        .filters select {
+            padding: 11px;
+            border: 1px solid #ccd5e5;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .filters input {
+            width: 300px;
+        }
+
+
+        /* =========================
+           TABLE
+        ========================= */
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            background: #eef3fa;
+            padding: 13px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 13px;
+            border-bottom: 1px solid #e5eaf2;
+            white-space: nowrap;
+        }
+
+
+        /* =========================
+           STATUS
+        ========================= */
+
+        .active-status {
+            color: #16803c;
+            font-weight: bold;
+        }
+
+        .maintenance-status {
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        .inspection-status {
+            color: #d07800;
+            font-weight: bold;
+        }
+
+
+        /* =========================
+           ADD BUS FORM
+        ========================= */
+
+        .form-section {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f7f9fc;
+            border-radius: 8px;
+        }
+
+        .bus-form {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .bus-form label {
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .bus-form input,
+        .bus-form select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            border: 1px solid #ccd5e5;
+            border-radius: 6px;
+        }
+
+        .bus-form input[readonly] {
+            background: #e9eef5;
+            cursor: not-allowed;
+        }
+
+
+        /* =========================
+           SAVE BUTTON
+        ========================= */
+
+        .save-btn {
+            grid-column: span 3;
+            background: #e87922;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .save-btn:hover {
+            background: #cf6418;
+        }
+
+
+        /* =========================
+           DELETE BUTTON
+        ========================= */
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .delete-btn:hover {
+            background: #b52a37;
+        }
+
+
+        /* =========================
+           MESSAGE
+        ========================= */
+
+        .message {
+            display: none;
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .success {
+            display: block;
+            background: #e6f5eb;
+            color: #16803c;
+        }
+
+        .error {
+            display: block;
+            background: #fdeaea;
+            color: #c62828;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media(max-width: 900px) {
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .header {
+                display: block;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .filters input {
+                width: 100%;
+            }
+
+            .bus-form {
+                grid-template-columns: 1fr;
+            }
+
+            .save-btn {
+                grid-column: span 1;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================
+     SIDEBAR
+========================= -->
+
+<div class="sidebar">
+
+    <div class="logo">
+        BusPredict
+    </div>
+
+    <div class="subtitle">
+        AI Predictive Maintenance
+    </div>
+
+    <div class="menu">
+
+        <a href="dashboard.html">
+            Dashboard
+        </a>
+
+        <a href="buses.html" class="active">
+            Buses
+        </a>
+
+        <a href="index.html">
+            Smart Inspection
+        </a>
+
+        <a href="inspection_history.html">
+            Inspection History
+        </a>
+
+        <a href="maintenance_alert.html">
+            Maintenance Alerts
+        </a>
+
+        <a href="maintenance_records.html">
+            Maintenance Records
+        </a>
+
+        <a href="reports.html">
+            Reports
+        </a>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================
+     MAIN CONTENT
+========================= -->
+
+<div class="main">
+
+
+    <div class="header">
+
+        <div>
+
+            <h1>
+                Bus Management
+            </h1>
+
+            <p>
+                Manage buses registered in the BusPredict system.
+            </p>
+
+        </div>
+
+
+        <button
+            class="add-btn"
+            onclick="showAddBus()">
+
+            + Add Bus
+
+        </button>
+
+    </div>
+
+
+
+    <div class="card">
+
+
+        <!-- FILTERS -->
+
+        <div class="filters">
+
+            <input
+                type="text"
+                id="search"
+                placeholder="Search by Bus ID or Registration No."
+                onkeyup="filterBuses()">
+
+
+            <select
+                id="statusFilter"
+                onchange="filterBuses()">
+
+                <option value="All">
+                    All Status
+                </option>
+
+                <option value="Active">
+                    Active
+                </option>
+
+                <option value="Maintenance">
+                    Maintenance
+                </option>
+
+                <option value="Inspection Due">
+                    Inspection Due
+                </option>
+
+            </select>
+
+        </div>
+
+
+
+        <!-- =========================
+             ADD BUS FORM
+        ========================= -->
+
+        <div
+            id="addBusSection"
+            class="form-section">
+
+            <h3>
+                Add New Bus
+            </h3>
+
+
+            <form
+                class="bus-form"
+                id="busForm">
+
+
+                <label>
+
+                    Bus ID
+
+                    <input
+                        id="busId"
+                        required
+                        placeholder="BUS-003">
+
+                </label>
+
+
+                <label>
+
+                    Registration Number
+
+                    <input
+                        id="registration"
+                        required
+                        placeholder="WP-NB-5678">
+
+                </label>
+
+
+                <label>
+
+                    Bus Model
+
+                    <input
+                        id="busModel"
+                        required
+                        placeholder="Ashok Leyland">
+
+                </label>
+
+
+                <label>
+
+                    Year
+
+                    <input
+                        id="year"
+                        type="number"
+                        required
+                        min="1990"
+                        max="2026"
+                        placeholder="2020"
+                        oninput="calculateVehicleAge()">
+
+                </label>
+
+
+                <label>
+
+                    Vehicle Age
+
+                    <input
+                        id="vehicleAge"
+                        type="number"
+                        required
+                        readonly
+                        placeholder="Calculated automatically">
+
+                </label>
+
+
+                <label>
+
+                    Mileage (km)
+
+                    <input
+                        id="mileage"
+                        type="number"
+                        required
+                        min="0"
+                        placeholder="85000">
+
+                </label>
+
+
+                <label>
+
+                    Fuel Type
+
+                    <select
+                        id="fuelType"
+                        required>
+
+                        <option value="">
+                            Select Fuel Type
+                        </option>
+
+                        <option value="Diesel">
+                            Diesel
+                        </option>
+
+                        <option value="Petrol">
+                            Petrol
+                        </option>
+
+                        <option value="Hybrid">
+                            Hybrid
+                        </option>
+
+                        <option value="Electric">
+                            Electric
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <label>
+
+                    Transmission Type
+
+                    <select
+                        id="transmissionType"
+                        required>
+
+                        <option value="">
+                            Select Transmission
+                        </option>
+
+                        <option value="Manual">
+                            Manual
+                        </option>
+
+                        <option value="Automatic">
+                            Automatic
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <label>
+
+                    Status
+
+                    <select id="status">
+
+                        <option value="Active">
+                            Active
+                        </option>
+
+                        <option value="Maintenance">
+                            Maintenance
+                        </option>
+
+                        <option value="Inspection Due">
+                            Inspection Due
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <button
+                    type="submit"
+                    class="save-btn">
+
+                    Save Bus
+
+                </button>
+
+            </form>
+
+
+            <div
+                id="message"
+                class="message">
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             REGISTERED BUSES
+        ========================= -->
+
+        <h2>
+            Registered Buses
+        </h2>
+
+
+        <table id="busTable">
+
+            <thead>
+
+                <tr>
+
+                    <th>Bus ID</th>
+
+                    <th>Registration No.</th>
+
+                    <th>Model</th>
+
+                    <th>Year</th>
+
+                    <th>Vehicle Age</th>
+
+                    <th>Mileage</th>
+
+                    <th>Fuel</th>
+
+                    <th>Transmission</th>
+
+                    <th>Status</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="busTableBody">
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+
+/* =========================
+   API URL
+========================= */
+
+const API_URL =
+    "http://127.0.0.1:8000";
+
+
+
+/* =========================
+   AUTOMATIC VEHICLE AGE
+========================= */
+
+function calculateVehicleAge() {
+
+    const yearInput =
+        document.getElementById(
+            "year"
+        );
+
+    const ageInput =
+        document.getElementById(
+            "vehicleAge"
+        );
+
+    const year =
+        Number(
+            yearInput.value
+        );
+
+    const currentYear =
+        new Date().getFullYear();
+
+
+    if (
+        year >= 1990 &&
+        year <= currentYear
+    ) {
+
+        ageInput.value =
+            currentYear - year;
+
+    } else {
+
+        ageInput.value = "";
+
+    }
+
+}
+
+
+
+/* =========================
+   SHOW / HIDE ADD BUS
+========================= */
+
+function showAddBus() {
+
+    const section =
+        document.getElementById(
+            "addBusSection"
+        );
+
+
+    if (
+        section.style.display === "block"
+    ) {
+
+        section.style.display =
+            "none";
+
+    } else {
+
+        section.style.display =
+            "block";
+
+    }
+
+}
+
+
+
+/* =========================
+   LOAD BUSES
+========================= */
+
+async function loadBuses() {
+
+    const tableBody =
+        document.getElementById(
+            "busTableBody"
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/buses`
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to load buses."
+            );
+
+        }
+
+
+        const buses =
+            await response.json();
+
+
+        tableBody.innerHTML = "";
+
+
+        if (buses.length === 0) {
+
+            tableBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="10"
+                        style="text-align:center;">
+
+                        No buses registered.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        buses.forEach(
+            function(bus) {
+
+
+                let statusClass =
+                    "active-status";
+
+
+                if (
+                    bus.status ===
+                    "Maintenance"
+                ) {
+
+                    statusClass =
+                        "maintenance-status";
+
+                }
+
+
+                if (
+                    bus.status ===
+                    "Inspection Due"
+                ) {
+
+                    statusClass =
+                        "inspection-status";
+
+                }
+
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                row.innerHTML = `
+
+                    <td>
+                        ${bus.bus_number}
+                    </td>
+
+                    <td>
+                        ${bus.registration_number}
+                    </td>
+
+                    <td>
+                        ${bus.bus_model}
+                    </td>
+
+                    <td>
+                        ${bus.year}
+                    </td>
+
+                    <td>
+                        ${bus.vehicle_age} years
+                    </td>
+
+                    <td>
+                        ${Number(
+                            bus.mileage
+                        ).toLocaleString()} km
+                    </td>
+
+                    <td>
+                        ${bus.fuel_type}
+                    </td>
+
+                    <td>
+                        ${bus.transmission_type}
+                    </td>
+
+                    <td
+                        class="${statusClass}">
+
+                        ${bus.status}
+
+                    </td>
+
+                    <td>
+
+                        <button
+                            class="delete-btn"
+                            onclick="deleteBus(
+                                ${bus.id},
+                                '${bus.bus_number}'
+                            )">
+
+                            Delete
+
+                        </button>
+
+                    </td>
+
+                `;
+
+
+                tableBody.appendChild(
+                    row
+                );
+
+            }
+        );
+
+
+        filterBuses();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        tableBody.innerHTML = `
+
+            <tr>
+
+                <td colspan="10">
+
+                    Could not connect to BusPredict API.
+                    Make sure FastAPI is running.
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+}
+
+
+
+/* =========================
+   ADD BUS
+========================= */
+
+document
+    .getElementById("busForm")
+    .addEventListener(
+
+        "submit",
+
+        async function(event) {
+
+
+            event.preventDefault();
+
+
+            const message =
+                document.getElementById(
+                    "message"
+                );
+
+
+            message.className =
+                "message";
+
+            message.textContent = "";
+
+
+            const busData = {
+
+
+                bus_number:
+
+                    document
+                        .getElementById(
+                            "busId"
+                        )
+                        .value
+                        .trim(),
+
+
+                registration_number:
+
+                    document
+                        .getElementById(
+                            "registration"
+                        )
+                        .value
+                        .trim(),
+
+
+                bus_model:
+
+                    document
+                        .getElementById(
+                            "busModel"
+                        )
+                        .value
+                        .trim(),
+
+
+                year:
+
+                    Number(
+                        document
+                            .getElementById(
+                                "year"
+                            )
+                            .value
+                    ),
+
+
+                vehicle_age:
+
+                    Number(
+                        document
+                            .getElementById(
+                                "vehicleAge"
+                            )
+                            .value
+                    ),
+
+
+                mileage:
+
+                    Number(
+                        document
+                            .getElementById(
+                                "mileage"
+                            )
+                            .value
+                    ),
+
+
+                fuel_type:
+
+                    document
+                        .getElementById(
+                            "fuelType"
+                        )
+                        .value,
+
+
+                transmission_type:
+
+                    document
+                        .getElementById(
+                            "transmissionType"
+                        )
+                        .value,
+
+
+                status:
+
+                    document
+                        .getElementById(
+                            "status"
+                        )
+                        .value
+
+            };
+
+
+            try {
+
+
+                const response =
+                    await fetch(
+
+                        `${API_URL}/buses`,
+
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify(
+                                    busData
+                                )
+
+                        }
+
+                    );
+
+
+                const result =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+
+                    let errorMessage =
+                        "Unable to save bus.";
+
+
+                    if (
+                        typeof result.detail
+                        === "string"
+                    ) {
+
+                        errorMessage =
+                            result.detail;
+
+                    }
+
+
+                    throw new Error(
+                        errorMessage
+                    );
+
+                }
+
+
+                message.textContent =
+                    "Bus registered successfully.";
+
+
+                message.className =
+                    "message success";
+
+
+                document
+                    .getElementById(
+                        "busForm"
+                    )
+                    .reset();
+
+
+                await loadBuses();
+
+
+                setTimeout(
+
+                    function() {
+
+
+                        document
+                            .getElementById(
+                                "addBusSection"
+                            )
+                            .style
+                            .display =
+                            "none";
+
+
+                        message.className =
+                            "message";
+
+                    },
+
+                    1200
+
+                );
+
+
+            } catch (error) {
+
+
+                console.error(error);
+
+
+                message.textContent =
+                    error.message;
+
+
+                message.className =
+                    "message error";
+
+            }
+
+        }
+
+    );
+
+
+
+/* =========================
+   DELETE BUS
+========================= */
+
+async function deleteBus(
+    busId,
+    busNumber
+) {
+
+
+    const confirmed =
+        confirm(
+            `Are you sure you want to delete ${busNumber}?`
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    try {
+
+
+        const response =
+            await fetch(
+
+                `${API_URL}/buses/${busId}`,
+
+                {
+                    method: "DELETE"
+                }
+
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+
+            throw new Error(
+
+                result.detail ||
+
+                "Unable to delete bus."
+
+            );
+
+        }
+
+
+        alert(
+            `${busNumber} deleted successfully.`
+        );
+
+
+        await loadBuses();
+
+
+    } catch (error) {
+
+
+        console.error(error);
+
+
+        alert(
+            "Error: " +
+            error.message
+        );
+
+    }
+
+}
+
+
+
+/* =========================
+   SEARCH / FILTER
+========================= */
+
+function filterBuses() {
+
+
+    const search =
+        document
+            .getElementById(
+                "search"
+            )
+            .value
+            .toLowerCase();
+
+
+    const status =
+        document
+            .getElementById(
+                "statusFilter"
+            )
+            .value;
+
+
+    const rows =
+        document.querySelectorAll(
+            "#busTable tbody tr"
+        );
+
+
+    rows.forEach(
+        function(row) {
+
+
+            if (
+                row.cells.length < 10
+            ) {
+
+                return;
+
+            }
+
+
+            const busId =
+                row
+                    .cells[0]
+                    .textContent
+                    .toLowerCase();
+
+
+            const registration =
+                row
+                    .cells[1]
+                    .textContent
+                    .toLowerCase();
+
+
+            const busStatus =
+                row
+                    .cells[8]
+                    .textContent
+                    .trim();
+
+
+            const matchesSearch =
+
+                busId.includes(
+                    search
+                )
+
+                ||
+
+                registration.includes(
+                    search
+                );
+
+
+            const matchesStatus =
+
+                status === "All"
+
+                ||
+
+                busStatus === status;
+
+
+            if (
+                matchesSearch &&
+                matchesStatus
+            ) {
+
+                row.style.display = "";
+
+            } else {
+
+                row.style.display =
+                    "none";
+
+            }
+
+        }
+
+    );
+
+}
+
+
+
+/* =========================
+   LOAD PAGE
+========================= */
+
+document.addEventListener(
+
+    "DOMContentLoaded",
+
+    function() {
+
+        loadBuses();
+
+    }
+
+);
+
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BusPredict - Smart Inspection</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #172b4d;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            background: #203b6b;
+            color: white;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 25px 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #cbd6eb;
+            margin-bottom: 35px;
+        }
+
+        .menu a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 13px 15px;
+            margin-bottom: 8px;
+            border-radius: 7px;
+        }
+
+        .menu a:hover,
+        .menu .active {
+            background: #31558f;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+            margin-left: 240px;
+            padding: 30px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .header p {
+            color: #60708d;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           CARD
+        ========================= */
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 24px;
+            margin-top: 25px;
+            box-shadow: 0 2px 10px #d8dfeb;
+        }
+
+        /* =========================
+           BUS SELECTION
+        ========================= */
+
+        .bus-selection {
+            margin-bottom: 25px;
+        }
+
+        .bus-selection label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .bus-selection select {
+            width: 100%;
+            max-width: 500px;
+            padding: 12px;
+            margin-top: 8px;
+            border: 1px solid #ccd5e5;
+            border-radius: 6px;
+            background: white;
+        }
+
+        /* =========================
+           BUS INFORMATION
+        ========================= */
+
+        .bus-info {
+            display: none;
+            background: #eef3fa;
+            padding: 18px;
+            border-radius: 8px;
+            margin-top: 18px;
+            margin-bottom: 25px;
+        }
+
+        .bus-info h3 {
+            margin-top: 0;
+        }
+
+        .bus-info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .info-title {
+            font-size: 12px;
+            color: #60708d;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-weight: bold;
+        }
+
+        /* =========================
+           FORM
+        ========================= */
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px;
+            margin-top: 6px;
+            border: 1px solid #ccd5e5;
+            border-radius: 6px;
+            background: white;
+        }
+
+        input[readonly],
+        select:disabled {
+            background: #eef2f7;
+            color: #45556f;
+            cursor: not-allowed;
+            opacity: 1;
+        }
+
+        /* =========================
+           BUTTON
+        ========================= */
+
+        .analyse-btn {
+            grid-column: span 3;
+            background: #e87922;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 7px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .analyse-btn:hover {
+            background: #cf6418;
+        }
+
+        .analyse-btn:disabled {
+            background: #aeb8c8;
+            cursor: not-allowed;
+        }
+
+        /* =========================
+           RESULT
+        ========================= */
+
+        .result {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .metric {
+            background: #eef3fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .metric-title {
+            font-size: 14px;
+            color: #60708d;
+        }
+
+        .value {
+            font-size: 22px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .wide {
+            grid-column: span 3;
+        }
+
+        .small {
+            font-size: 13px;
+            color: #60708d;
+            line-height: 1.5;
+        }
+
+        .saved-message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            background: #e8f5e9;
+            color: #16803c;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* =========================
+           RISK COLOURS
+        ========================= */
+
+        .risk-low {
+            color: #16803c;
+        }
+
+        .risk-medium {
+            color: #d07800;
+        }
+
+        .risk-high {
+            color: #c62828;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media(max-width: 900px) {
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            form,
+            .result,
+            .bus-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .analyse-btn,
+            .wide {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===============================
+         SIDEBAR
+    ================================ -->
+
+    <div class="sidebar">
+
+        <div class="logo">
+            BusPredict
+        </div>
+
+        <div class="subtitle">
+            AI Predictive Maintenance
+        </div>
+
+       <div class="menu">
+
+    <a href="dashboard.html">
+        Dashboard
+    </a>
+
+    <a href="buses.html">
+        Buses
+    </a>
+
+    <a href="index.html" class="active">
+        Smart Inspection
+    </a>
+
+    <a href="inspection_history.html">
+        Inspection History
+    </a>
+
+    <a href="maintenance_alert.html">
+        Maintenance Alerts
+    </a>
+
+    <a href="maintenance_records.html">
+        Maintenance Records
+    </a>
+
+    <a href="reports.html">
+        Reports
+    </a>
+
+</div>
+
+    </div>
+
+
+    <!-- ===============================
+         MAIN
+    ================================ -->
+
+    <div class="main">
+
+        <div class="header">
+
+            <h1>
+                Smart Bus Inspection
+            </h1>
+
+            <p>
+                Select a registered bus and enter its current
+                condition to receive an AI-assisted maintenance
+                prediction.
+            </p>
+
+        </div>
+
+
+        <!-- ===============================
+             BUS SELECTION
+        ================================ -->
+
+        <div class="card">
+
+            <h2>
+                Select Registered Bus
+            </h2>
+
+            <div class="bus-selection">
+
+                <label>
+                    Bus
+
+                    <select id="busSelect">
+
+                        <option value="">
+                            Loading registered buses...
+                        </option>
+
+                    </select>
+
+                </label>
+
+            </div>
+
+
+            <!-- BUS INFORMATION -->
+
+            <div id="busInfo" class="bus-info">
+
+                <h3>
+                    Selected Bus Information
+                </h3>
+
+                <div class="bus-info-grid">
+
+                    <div class="info-item">
+
+                        <div class="info-title">
+                            Bus ID
+                        </div>
+
+                        <div
+                            id="infoBusNumber"
+                            class="info-value">
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-title">
+                            Registration
+                        </div>
+
+                        <div
+                            id="infoRegistration"
+                            class="info-value">
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-title">
+                            Model
+                        </div>
+
+                        <div
+                            id="infoModel"
+                            class="info-value">
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <div class="info-title">
+                            Year
+                        </div>
+
+                        <div
+                            id="infoYear"
+                            class="info-value">
+                            -
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===============================
+             INSPECTION FORM
+        ================================ -->
+
+        <div class="card">
+
+            <h2>
+                Vehicle Condition
+            </h2>
+
+            <form id="inspectionForm">
+
+
+                <!-- MILEAGE -->
+
+                <label>
+                    Mileage
+
+                    <input
+                        id="mileage"
+                        name="Mileage"
+                        type="number"
+                        min="0"
+                        required
+                        readonly>
+                </label>
+
+
+                <!-- MAINTENANCE HISTORY -->
+
+                <label>
+                    Maintenance History
+
+                    <select
+                        name="Maintenance_History"
+                        required>
+
+                        <option value="Good">
+                            Good
+                        </option>
+
+                        <option value="Average">
+                            Average
+                        </option>
+
+                        <option value="Poor">
+                            Poor
+                        </option>
+
+                    </select>
+                </label>
+
+
+                <!-- REPORTED ISSUES -->
+
+                <label>
+                    Reported Issues
+
+                    <input
+                        name="Reported_Issues"
+                        type="number"
+                        min="0"
+                        value="0"
+                        required>
+                </label>
+
+
+                <!-- VEHICLE AGE -->
+
+                <label>
+                    Vehicle Age (Years)
+
+                    <input
+                        id="vehicleAge"
+                        name="Vehicle_Age"
+                        type="number"
+                        min="0"
+                        required
+                        readonly>
+                </label>
+
+
+                <!-- FUEL TYPE -->
+
+                <label>
+                    Fuel Type
+
+                    <select
+                        id="fuelType"
+                        name="Fuel_Type"
+                        required
+                        disabled>
+
+                        <option value="">
+                            Select Fuel
+                        </option>
+
+                        <option value="Diesel">
+                            Diesel
+                        </option>
+
+                        <option value="Petrol">
+                            Petrol
+                        </option>
+
+                        <option value="Electric">
+                            Electric
+                        </option>
+
+                        <option value="Hybrid">
+                            Hybrid
+                        </option>
+
+                    </select>
+                </label>
+
+
+                <!-- TRANSMISSION -->
+
+                <label>
+                    Transmission Type
+
+                    <select
+                        id="transmissionType"
+                        name="Transmission_Type"
+                        required
+                        disabled>
+
+                        <option value="">
+                            Select Transmission
+                        </option>
+
+                        <option value="Manual">
+                            Manual
+                        </option>
+
+                        <option value="Automatic">
+                            Automatic
+                        </option>
+
+                    </select>
+                </label>
+
+
+                <!-- ENGINE SIZE -->
+
+                <label>
+                    Engine Size
+
+                    <input
+                        name="Engine_Size"
+                        type="number"
+                        min="0"
+                        value="2000"
+                        required>
+                </label>
+
+
+                <!-- ODOMETER -->
+
+                <label>
+                    Odometer Reading
+
+                    <input
+                        name="Odometer_Reading"
+                        type="number"
+                        min="0"
+                        value="90000"
+                        required>
+                </label>
+
+
+                <!-- OWNER TYPE -->
+
+                <label>
+                    Owner Type
+
+                    <select
+                        name="Owner_Type"
+                        required>
+
+                        <option value="First">
+                            First
+                        </option>
+
+                        <option value="Second">
+                            Second
+                        </option>
+
+                        <option value="Third">
+                            Third
+                        </option>
+
+                    </select>
+                </label>
+
+
+                <!-- SERVICE HISTORY -->
+
+                <label>
+                    Service History
+
+                    <input
+                        name="Service_History"
+                        type="number"
+                        min="0"
+                        value="5"
+                        required>
+                </label>
+
+
+                <!-- ACCIDENT HISTORY -->
+
+                <label>
+                    Accident History
+
+                    <input
+                        name="Accident_History"
+                        type="number"
+                        min="0"
+                        value="0"
+                        required>
+                </label>
+
+
+                <!-- FUEL EFFICIENCY -->
+
+                <label>
+                    Fuel Efficiency
+
+                    <input
+                        name="Fuel_Efficiency"
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        value="15.5"
+                        required>
+                </label>
+
+
+                <!-- TIRE CONDITION -->
+
+                <label>
+                    Tire Condition
+
+                    <select
+                        name="Tire_Condition"
+                        required>
+
+                        <option value="Good">
+                            Good
+                        </option>
+
+                        <option value="New">
+                            New
+                        </option>
+
+                        <option value="Worn Out">
+                            Worn Out
+                        </option>
+
+                    </select>
+                </label>
+
+
+                <!-- BRAKE CONDITION -->
+
+                <label>
+                    Brake Condition
+
+                    <select
+                        name="Brake_Condition"
+                        required>
+
+                        <option value="Good">
+                            Good
+                        </option>
+
+                        <option value="New">
+                            New
+                        </option>
+
+                        <option value="Worn Out">
+                            Worn Out
+                        </option>
+
+                    </select>
+                </label>
+
+
+                <!-- BATTERY STATUS -->
+
+                <label>
+                    Battery Status
+
+                    <select
+                        name="Battery_Status"
+                        required>
+
+                        <option value="Good">
+                            Good
+                        </option>
+
+                        <option value="New">
+                            New
+                        </option>
+
+                        <option value="Weak">
+                            Weak
+                        </option>
+
+                    </select>
+                </label>
+
+
+                <!-- ANALYSE BUTTON -->
+
+                <button
+                    id="analyseButton"
+                    class="analyse-btn"
+                    type="submit">
+
+                    Analyse Bus Condition
+
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- ===============================
+             AI RESULT
+        ================================ -->
+
+        <div class="card">
+
+            <h2>
+                AI Maintenance Prediction
+            </h2>
+
+            <div
+                id="output"
+                class="result">
+
+                <div class="metric wide">
+
+                    Select a registered bus,
+                    complete the inspection form,
+                    and click
+
+                    <strong>
+                        Analyse Bus Condition
+                    </strong>
+
+                    to view the AI prediction.
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ===============================
+             RESPONSIBLE USE
+        ================================ -->
+
+        <div class="card">
+
+            <h3>
+                Responsible Use Notice
+            </h3>
+
+            <p class="small">
+
+                BusPredict provides AI-based decision
+                support and does not replace professional
+                vehicle inspection.
+
+                Maintenance decisions should be verified
+                by a qualified vehicle technician.
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===============================
+         JAVASCRIPT
+    ================================ -->
+
+    <script>
+
+        /* ===============================
+           API SETTINGS
+        ================================ */
+
+        const API_URL =
+            "http://127.0.0.1:8000";
+
+
+        const form =
+            document.getElementById(
+                "inspectionForm"
+            );
+
+
+        const output =
+            document.getElementById(
+                "output"
+            );
+
+
+        const busSelect =
+            document.getElementById(
+                "busSelect"
+            );
+
+
+        const analyseButton =
+            document.getElementById(
+                "analyseButton"
+            );
+
+
+        let registeredBuses = [];
+
+        let selectedBus = null;
+
+        // Prediction is kept in memory until the user explicitly saves it.
+        let pendingInspectionData = null;
+        let pendingPrediction = null;
+
+
+        /* ===============================
+           LOAD REGISTERED BUSES
+        ================================ */
+
+        async function loadRegisteredBuses() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_URL}/buses`
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Unable to load registered buses."
+                    );
+
+                }
+
+
+                registeredBuses =
+                    await response.json();
+
+
+                busSelect.innerHTML = `
+
+                    <option value="">
+                        Select a registered bus
+                    </option>
+
+                `;
+
+
+                registeredBuses.forEach(
+                    function(bus) {
+
+                        const option =
+                            document.createElement(
+                                "option"
+                            );
+
+
+                        option.value =
+                            String(bus.id);
+
+
+                        option.textContent =
+                            `${bus.bus_number} — ${bus.registration_number}`;
+
+
+                        busSelect.appendChild(
+                            option
+                        );
+
+                    }
+                );
+
+
+                if (registeredBuses.length === 0) {
+
+                    busSelect.innerHTML = `
+
+                        <option value="">
+                            No registered buses available
+                        </option>
+
+                    `;
+
+                }
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                busSelect.innerHTML = `
+
+                    <option value="">
+                        Unable to load buses
+                    </option>
+
+                `;
+
+
+                output.innerHTML = `
+
+                    <div class="metric wide">
+
+                        <strong>
+                            Unable to load registered buses.
+                        </strong>
+
+                        <br><br>
+
+                        Make sure the BusPredict FastAPI
+                        server is running on port 8000.
+
+                    </div>
+
+                `;
+
+            }
+
+        }
+
+
+        /* ===============================
+           BUS DROPDOWN CHANGE
+        ================================ */
+
+        busSelect.addEventListener(
+            "change",
+            function() {
+
+                selectBus();
+
+            }
+        );
+
+
+        /* ===============================
+           SELECT BUS
+        ================================ */
+
+        function selectBus() {
+
+            const selectedValue =
+                busSelect.value;
+
+
+            const busInfo =
+                document.getElementById(
+                    "busInfo"
+                );
+
+
+            /* No bus selected */
+
+            if (selectedValue === "") {
+
+                selectedBus = null;
+
+                busInfo.style.display =
+                    "none";
+
+
+                document.getElementById(
+                    "mileage"
+                ).value = "";
+
+
+                document.getElementById(
+                    "vehicleAge"
+                ).value = "";
+
+
+                document.getElementById(
+                    "fuelType"
+                ).value = "";
+
+
+                document.getElementById(
+                    "transmissionType"
+                ).value = "";
+
+
+                return;
+
+            }
+
+
+            /*
+             * Compare IDs as strings.
+             * This prevents number/string
+             * type mismatch problems.
+             */
+
+            selectedBus =
+                registeredBuses.find(
+                    function(bus) {
+
+                        return (
+                            String(bus.id) ===
+                            String(selectedValue)
+                        );
+
+                    }
+                );
+
+
+            if (!selectedBus) {
+
+                busInfo.style.display =
+                    "none";
+
+
+                alert(
+                    "Unable to find the selected bus."
+                );
+
+
+                return;
+
+            }
+
+
+            console.log(
+                "Selected bus:",
+                selectedBus
+            );
+
+
+            /* =========================
+               DISPLAY BUS INFORMATION
+            ========================= */
+
+            busInfo.style.display =
+                "block";
+
+
+            document.getElementById(
+                "infoBusNumber"
+            ).textContent =
+                selectedBus.bus_number;
+
+
+            document.getElementById(
+                "infoRegistration"
+            ).textContent =
+                selectedBus.registration_number;
+
+
+            document.getElementById(
+                "infoModel"
+            ).textContent =
+                selectedBus.bus_model;
+
+
+            document.getElementById(
+                "infoYear"
+            ).textContent =
+                selectedBus.year;
+
+
+            /* =========================
+               AUTO-FILL MODEL FIELDS
+            ========================= */
+
+            document.getElementById(
+                "mileage"
+            ).value =
+                selectedBus.mileage;
+
+
+            document.getElementById(
+                "vehicleAge"
+            ).value =
+                selectedBus.vehicle_age;
+
+
+            document.getElementById(
+                "fuelType"
+            ).value =
+                selectedBus.fuel_type;
+
+
+            document.getElementById(
+                "transmissionType"
+            ).value =
+                selectedBus.transmission_type;
+
+
+            /* Reset previous prediction */
+
+            pendingInspectionData = null;
+            pendingPrediction = null;
+
+            output.innerHTML = `
+
+                <div class="metric wide">
+
+                    <strong>
+                        ${selectedBus.bus_number}
+                    </strong>
+
+                    selected successfully.
+
+                    Complete the vehicle condition
+                    and click
+
+                    <strong>
+                        Analyse Bus Condition
+                    </strong>.
+
+                </div>
+
+            `;
+
+        }
+
+
+        /* ===============================
+           ANALYSE INSPECTION
+        ================================ */
+
+        form.addEventListener(
+            "submit",
+
+            async function(event) {
+
+                event.preventDefault();
+
+
+                /*
+                 * Read the dropdown directly again
+                 * at submit time.
+                 */
+
+                const selectedValue =
+                    busSelect.value;
+
+                // Remember the selected bus during analysis
+                const selectedBusIdBeforeAnalysis = selectedValue;
+
+
+                if (!selectedValue) {
+
+                    alert(
+                        "Please select a registered bus first."
+                    );
+
+                    busSelect.focus();
+
+                    return;
+
+                }
+
+
+                /*
+                 * Re-find the selected bus.
+                 * This prevents the selectedBus
+                 * variable becoming stale.
+                 */
+
+                selectedBus =
+                    registeredBuses.find(
+                        function(bus) {
+
+                            return (
+                                String(bus.id) ===
+                                String(selectedValue)
+                            );
+
+                        }
+                    );
+
+
+                if (!selectedBus) {
+
+                    alert(
+                        "Selected bus could not be found. Please select the bus again."
+                    );
+
+                    return;
+
+                }
+
+
+                /* =========================
+                   CREATE FORM DATA
+                ========================= */
+
+                const data =
+                    Object.fromEntries(
+                        new FormData(form)
+                    );
+
+
+                /*
+                 * Connect this inspection
+                 * to the selected database bus.
+                 */
+
+                data.bus_id =
+                    Number(selectedBus.id);
+
+
+                /*
+                 * Disabled SELECT elements are
+                 * not included in FormData,
+                 * so add them manually.
+                 */
+
+                data.Fuel_Type =
+                    selectedBus.fuel_type;
+
+
+                data.Transmission_Type =
+                    selectedBus.transmission_type;
+
+
+                /*
+                 * Use database values for
+                 * these bus-specific fields.
+                 */
+
+                data.Mileage =
+                    Number(
+                        selectedBus.mileage
+                    );
+
+
+                data.Vehicle_Age =
+                    Number(
+                        selectedBus.vehicle_age
+                    );
+
+
+                /* =========================
+                   CONVERT NUMERIC VALUES
+                ========================= */
+
+                const numericFields = [
+
+                    "Reported_Issues",
+
+                    "Engine_Size",
+
+                    "Odometer_Reading",
+
+                    "Service_History",
+
+                    "Accident_History",
+
+                    "Fuel_Efficiency"
+
+                ];
+
+
+                numericFields.forEach(
+                    function(field) {
+
+                        data[field] =
+                            Number(
+                                data[field]
+                            );
+
+                    }
+                );
+
+
+                console.log(
+                    "Inspection request:",
+                    data
+                );
+
+
+                /* =========================
+                   ANALYSING MESSAGE
+                ========================= */
+
+                output.innerHTML = `
+
+                    <div class="metric wide">
+
+                        AI model is analysing
+
+                        <strong>
+                            ${selectedBus.bus_number}
+                        </strong>
+
+                        ...
+
+                    </div>
+
+                `;
+
+
+                analyseButton.disabled =
+                    true;
+
+
+                analyseButton.textContent =
+                    "Analysing...";
+
+
+                try {
+
+                    /* =========================
+                       PREDICT ONLY
+                    ========================= */
+
+                    const response =
+                        await fetch(
+
+                            `${API_URL}/predict`,
+
+                            {
+
+                                method: "POST",
+
+                                headers: {
+
+                                    "Content-Type":
+                                        "application/json"
+
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        data
+                                    )
+
+                            }
+
+                        );
+
+
+                    let result;
+
+
+                    try {
+
+                        result =
+                            await response.json();
+
+                    } catch {
+
+                        throw new Error(
+                            "The server returned an invalid response."
+                        );
+
+                    }
+
+
+                    if (!response.ok) {
+
+                        let message =
+                            "Unable to generate prediction.";
+
+
+                        if (
+                            typeof result.detail ===
+                            "string"
+                        ) {
+
+                            message =
+                                result.detail;
+
+                        } else if (
+                            result.detail
+                        ) {
+
+                            message =
+                                JSON.stringify(
+                                    result.detail
+                                );
+
+                        }
+
+
+                        throw new Error(
+                            message
+                        );
+
+                    }
+
+
+                    // Keep the analysed values in memory. Nothing is saved yet.
+                    pendingInspectionData = { ...data };
+                    pendingPrediction = { ...result };
+
+
+                    /* =========================
+                       RISK COLOUR
+                    ========================= */
+
+                    let riskClass = "";
+
+
+                    if (
+                        result.risk_level ===
+                        "Low"
+                    ) {
+
+                        riskClass =
+                            "risk-low";
+
+                    } else if (
+                        result.risk_level ===
+                        "Medium"
+                    ) {
+
+                        riskClass =
+                            "risk-medium";
+
+                    } else if (
+                        result.risk_level ===
+                        "High"
+                    ) {
+
+                        riskClass =
+                            "risk-high";
+
+                    }
+
+
+                    /* =========================
+                       DISPLAY RESULT
+                    ========================= */
+
+                    output.innerHTML = `
+
+                        <div class="metric">
+
+                            <div class="metric-title">
+                                Bus
+                            </div>
+
+                            <div class="value">
+                                ${selectedBus.bus_number}
+                            </div>
+
+                            <p class="small">
+                                ${selectedBus.registration_number}
+                            </p>
+
+                        </div>
+
+
+                        <div class="metric">
+
+                            <div class="metric-title">
+                                Maintenance Status
+                            </div>
+
+                            <div class="value">
+                                ${result.maintenance_status}
+                            </div>
+
+                        </div>
+
+
+                        <div class="metric">
+
+                            <div class="metric-title">
+                                Risk Level
+                            </div>
+
+                            <div class="value ${riskClass}">
+                                ${result.risk_level}
+                            </div>
+
+                        </div>
+
+
+                        <div class="metric">
+
+                            <div class="metric-title">
+                                Maintenance Probability
+                            </div>
+
+                            <div class="value">
+                                ${result.maintenance_probability}%
+                            </div>
+
+                        </div>
+
+
+                        <div class="metric">
+
+                            <div class="metric-title">
+                                AI Model
+                            </div>
+
+                            <div class="value">
+                                ${result.model}
+                            </div>
+
+                        </div>
+
+
+                        <div class="metric">
+
+                            <div class="metric-title">
+                                Save Status
+                            </div>
+
+                            <div class="value" style="font-size:16px">
+                                Not Saved Yet
+                            </div>
+
+                        </div>
+
+
+                        <div class="metric wide">
+
+                            <strong>
+                                AI Recommendation
+                            </strong>
+
+                            <div
+                                class="value"
+                                style="font-size:16px">
+
+                                ${result.recommendation}
+
+                            </div>
+
+                            <p class="small">
+                                ${result.disclaimer}
+                            </p>
+
+                            <div class="saved-message" style="background:#fff4e5; color:#9a5a00;">
+
+                                Prediction generated only — not yet saved to Inspection History.
+
+                            </div>
+
+                            <button
+                                type="button"
+                                class="analyse-btn"
+                                style="width:100%; margin-top:15px;"
+                                onclick="saveCurrentInspection()">
+                                Save Inspection
+                            </button>
+
+                        </div>
+
+                    `;
+
+
+                } catch (error) {
+
+                    console.error(error);
+
+
+                    output.innerHTML = `
+
+                        <div class="metric wide">
+
+                            <strong>
+                                Unable to generate prediction.
+                            </strong>
+
+                            <br><br>
+
+                            ${error.message}
+
+                            <br><br>
+
+                            <span class="small">
+
+                                Make sure the BusPredict
+                                FastAPI server is running
+                                and POST /predict
+                                is available.
+
+                            </span>
+
+                        </div>
+
+                    `;
+
+               } finally {
+
+    analyseButton.disabled = false;
+
+    analyseButton.textContent =
+        "Analyse Bus Condition";
+
+    // Keep the analysed bus selected
+    if (selectedBusIdBeforeAnalysis) {
+        busSelect.value = selectedBusIdBeforeAnalysis;
+    }
+
+}
+
+            }
+        );
+
+
+        /* ===============================
+           SAVE INSPECTION
+        ================================ */
+
+        async function saveCurrentInspection() {
+
+            if (!pendingInspectionData || !pendingPrediction || !selectedBus) {
+                alert("Please analyse the bus condition first.");
+                return;
+            }
+
+            const saveButton = document.querySelector(
+                'button[onclick="saveCurrentInspection()"]'
+            );
+
+            if (saveButton) {
+                saveButton.disabled = true;
+                saveButton.textContent = "Saving...";
+            }
+
+            try {
+                const response = await fetch(
+                    `${API_URL}/inspections`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(pendingInspectionData)
+                    }
+                );
+
+                let savedResult;
+
+                try {
+                    savedResult = await response.json();
+                } catch {
+                    throw new Error("The server returned an invalid response.");
+                }
+
+                if (!response.ok) {
+                    let message = "Unable to save inspection.";
+
+                    if (typeof savedResult.detail === "string") {
+                        message = savedResult.detail;
+                    } else if (savedResult.detail) {
+                        message = JSON.stringify(savedResult.detail);
+                    }
+
+                    throw new Error(message);
+                }
+
+                const messageBox = document.querySelector(
+                    "#output .saved-message"
+                );
+
+                if (messageBox) {
+                    messageBox.style.background = "#e8f5e9";
+                    messageBox.style.color = "#16803c";
+                    messageBox.innerHTML =
+                        `✓ Inspection #${savedResult.inspection_id} saved successfully to Inspection History.`;
+                }
+
+                if (saveButton) {
+                    saveButton.textContent = "Inspection Saved";
+                    saveButton.disabled = true;
+                }
+
+                // Prevent duplicate saves from the same prediction.
+                pendingInspectionData = null;
+                pendingPrediction = null;
+
+            } catch (error) {
+                console.error(error);
+                alert(error.message);
+
+                if (saveButton) {
+                    saveButton.disabled = false;
+                    saveButton.textContent = "Save Inspection";
+                }
+            }
+        }
+
+
+        /* ===============================
+           PAGE LOAD
+        ================================ */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+
+            function() {
+
+                loadRegisteredBuses();
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

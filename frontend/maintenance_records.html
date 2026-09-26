@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BusPredict - Maintenance Records</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #172b4d;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            background: #203b6b;
+            color: white;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 25px 20px;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #cbd6eb;
+            margin-bottom: 35px;
+        }
+
+        .menu a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 13px 15px;
+            margin-bottom: 8px;
+            border-radius: 7px;
+        }
+
+        .menu a:hover,
+        .menu .active {
+            background: #31558f;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+            margin-left: 240px;
+            padding: 30px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .header p {
+            color: #60708d;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           SUMMARY
+        ========================= */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-top: 25px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px #d8dfeb;
+        }
+
+        .summary-title {
+            font-size: 14px;
+            color: #60708d;
+            margin-bottom: 10px;
+        }
+
+        .summary-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        /* =========================
+           CARD
+        ========================= */
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 24px;
+            margin-top: 25px;
+            box-shadow: 0 2px 10px #d8dfeb;
+        }
+
+        .card h2 {
+            margin-top: 0;
+        }
+
+        /* =========================
+           FORM
+        ========================= */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 7px;
+            font-size: 14px;
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 11px;
+            border: 1px solid #ccd5e5;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            background: white;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .save-btn {
+            margin-top: 20px;
+            background: #203b6b;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .save-btn:hover {
+            background: #31558f;
+        }
+
+        .save-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* =========================
+           MESSAGE
+        ========================= */
+
+        .message {
+            padding: 13px;
+            margin-top: 18px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .success {
+            display: block;
+            background: #e7f6eb;
+            color: #16803c;
+        }
+
+        .error {
+            display: block;
+            background: #fdeaea;
+            color: #c62828;
+        }
+
+        /* =========================
+           FILTERS
+        ========================= */
+
+        .filters {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        /* =========================
+           TABLE
+        ========================= */
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        th {
+            background: #203b6b;
+            color: white;
+            padding: 13px 10px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 13px 10px;
+            border-bottom: 1px solid #e1e7f0;
+            font-size: 13px;
+            vertical-align: top;
+        }
+
+        tbody tr:hover {
+            background: #f8faff;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .completed {
+            background: #e7f6eb;
+            color: #16803c;
+        }
+
+        .in-progress {
+            background: #fff3df;
+            color: #c56b00;
+        }
+
+        .empty {
+            text-align: center;
+            color: #60708d;
+            padding: 30px;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media(max-width: 1000px) {
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width: 700px) {
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <div class="sidebar">
+
+        <div class="logo">BusPredict</div>
+
+        <div class="subtitle">
+            AI Predictive Maintenance
+        </div>
+
+        <div class="menu">
+
+            <a href="dashboard.html">
+                Dashboard
+            </a>
+
+            <a href="buses.html">
+                Buses
+            </a>
+
+            <a href="index.html">
+                Smart Inspection
+            </a>
+
+            <a href="inspection_history.html">
+                Inspection History
+            </a>
+
+            <a href="maintenance_alert.html">
+                Maintenance Alerts
+            </a>
+
+            <a href="maintenance_records.html" class="active">
+                Maintenance Records
+            </a>
+
+            <a href="reports.html">
+                Reports
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+
+    <div class="main">
+
+        <div class="header">
+
+            <h1>Maintenance Records</h1>
+
+            <p>
+                Record maintenance work performed on buses and
+                review completed or ongoing maintenance activities.
+            </p>
+
+        </div>
+
+
+        <!-- =========================
+             SUMMARY CARDS
+        ========================== -->
+
+        <div class="summary-grid">
+
+            <div class="summary-card">
+
+                <div class="summary-title">
+                    Total Records
+                </div>
+
+                <div
+                    id="totalRecords"
+                    class="summary-value">
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-title">
+                    Completed
+                </div>
+
+                <div
+                    id="completedRecords"
+                    class="summary-value">
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-title">
+                    In Progress
+                </div>
+
+                <div
+                    id="progressRecords"
+                    class="summary-value">
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-title">
+                    Total Maintenance Cost
+                </div>
+
+                <div
+                    id="totalCost"
+                    class="summary-value">
+                    Rs. 0
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             NEW MAINTENANCE RECORD
+        ========================== -->
+
+        <div class="card">
+
+            <h2>Add Maintenance Record</h2>
+
+            <form id="maintenanceForm">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label for="busId">
+                            Bus *
+                        </label>
+
+                        <select
+                            id="busId"
+                            required>
+
+                            <option value="">
+                                Select a bus
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="alertId">
+                            Related Maintenance Alert
+                        </label>
+
+                        <select id="alertId">
+
+                            <option value="">
+                                No related alert
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="maintenanceType">
+                            Maintenance Type *
+                        </label>
+
+                        <select
+                            id="maintenanceType"
+                            required>
+
+                            <option value="">
+                                Select maintenance type
+                            </option>
+
+                            <option value="Corrective Maintenance">
+                                Corrective Maintenance
+                            </option>
+
+                            <option value="Preventive Maintenance">
+                                Preventive Maintenance
+                            </option>
+
+                            <option value="Routine Service">
+                                Routine Service
+                            </option>
+
+                            <option value="Emergency Repair">
+                                Emergency Repair
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="technicianName">
+                            Technician Name *
+                        </label>
+
+                        <input
+                            id="technicianName"
+                            type="text"
+                            placeholder="Enter technician name"
+                            required>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="cost">
+                            Cost (Rs.) *
+                        </label>
+
+                        <input
+                            id="cost"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="Example: 18500"
+                            required>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="status">
+                            Maintenance Status *
+                        </label>
+
+                        <select
+                            id="status"
+                            required>
+
+                            <option value="Completed">
+                                Completed
+                            </option>
+
+                            <option value="In Progress">
+                                In Progress
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group full">
+
+                        <label for="workPerformed">
+                            Work Performed *
+                        </label>
+
+                        <textarea
+                            id="workPerformed"
+                            placeholder="Describe the maintenance or repair work performed"
+                            required></textarea>
+
+                    </div>
+
+
+                    <div class="form-group full">
+
+                        <label for="notes">
+                            Notes
+                        </label>
+
+                        <textarea
+                            id="notes"
+                            placeholder="Additional notes"></textarea>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="saveButton"
+                    type="submit"
+                    class="save-btn">
+
+                    Save Maintenance Record
+
+                </button>
+
+
+                <div
+                    id="formMessage"
+                    class="message">
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <!-- =========================
+             HISTORY
+        ========================== -->
+
+        <div class="card">
+
+            <h2>Maintenance History</h2>
+
+
+            <div class="filters">
+
+                <input
+                    id="searchInput"
+                    type="text"
+                    placeholder="Search bus or registration">
+
+
+                <select id="typeFilter">
+
+                    <option value="">
+                        All Maintenance Types
+                    </option>
+
+                    <option value="Corrective Maintenance">
+                        Corrective Maintenance
+                    </option>
+
+                    <option value="Preventive Maintenance">
+                        Preventive Maintenance
+                    </option>
+
+                    <option value="Routine Service">
+                        Routine Service
+                    </option>
+
+                    <option value="Emergency Repair">
+                        Emergency Repair
+                    </option>
+
+                </select>
+
+
+                <select id="statusFilter">
+
+                    <option value="">
+                        All Status
+                    </option>
+
+                    <option value="Completed">
+                        Completed
+                    </option>
+
+                    <option value="In Progress">
+                        In Progress
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>ID</th>
+                            <th>Bus</th>
+                            <th>Registration</th>
+                            <th>Date</th>
+                            <th>Alert</th>
+                            <th>Type</th>
+                            <th>Work Performed</th>
+                            <th>Technician</th>
+                            <th>Cost</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="recordsTableBody">
+
+                        <tr>
+
+                            <td
+                                colspan="11"
+                                class="empty">
+
+                                Loading maintenance records...
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        const API_URL =
+            "http://127.0.0.1:8000";
+
+
+        let buses = [];
+
+        let alerts = [];
+
+        let maintenanceRecords = [];
+
+
+        /* =========================
+           ELEMENTS
+        ========================== */
+
+        const busSelect =
+            document.getElementById("busId");
+
+        const alertSelect =
+            document.getElementById("alertId");
+
+        const maintenanceForm =
+            document.getElementById(
+                "maintenanceForm"
+            );
+
+        const formMessage =
+            document.getElementById(
+                "formMessage"
+            );
+
+        const recordsTableBody =
+            document.getElementById(
+                "recordsTableBody"
+            );
+
+
+        /* =========================
+           LOAD BUSES
+        ========================== */
+
+        async function loadBuses() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_URL}/buses`
+                    );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Unable to load buses."
+                    );
+                }
+
+                buses =
+                    await response.json();
+
+
+                busSelect.innerHTML = `
+
+                    <option value="">
+                        Select a bus
+                    </option>
+
+                `;
+
+
+                buses.forEach(bus => {
+
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+                    option.value = bus.id;
+
+                    option.textContent =
+                        `${bus.bus_number} - ${bus.registration_number}`;
+
+                    busSelect.appendChild(
+                        option
+                    );
+
+                });
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                showMessage(
+                    "Unable to load registered buses.",
+                    "error"
+                );
+
+            }
+
+        }
+
+
+        /* =========================
+           LOAD ALERTS
+        ========================== */
+
+        async function loadAlerts() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_URL}/alerts`
+                    );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Unable to load alerts."
+                    );
+                }
+
+                alerts =
+                    await response.json();
+
+
+            } catch (error) {
+
+                console.error(error);
+
+            }
+
+        }
+
+
+        /* =========================
+           UPDATE ALERT DROPDOWN
+        ========================== */
+
+        function updateAlertDropdown() {
+
+            const selectedBusId =
+                Number(busSelect.value);
+
+
+            alertSelect.innerHTML = `
+
+                <option value="">
+                    No related alert
+                </option>
+
+            `;
+
+
+            if (!selectedBusId) {
+                return;
+            }
+
+
+            const selectedBus =
+                buses.find(bus =>
+                    Number(bus.id) === selectedBusId
+                );
+
+
+            const matchingAlerts =
+                alerts.filter(alert => {
+
+                    const matchesBusId =
+                        alert.bus_id != null &&
+                        Number(alert.bus_id) === selectedBusId;
+
+                    const matchesBusNumber =
+                        selectedBus &&
+                        alert.bus_number != null &&
+                        String(alert.bus_number) ===
+                            String(selectedBus.bus_number);
+
+                    return (
+                        (matchesBusId || matchesBusNumber) &&
+                        alert.status === "Open"
+                    );
+
+                });
+
+
+            matchingAlerts.forEach(alert => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    alert.alert_id;
+
+                option.textContent =
+                    `Alert #${alert.alert_id} - ${alert.risk_level} Risk (${alert.maintenance_probability}%)`;
+
+                alertSelect.appendChild(
+                    option
+                );
+
+            });
+
+        }
+
+
+        busSelect.addEventListener(
+            "change",
+            updateAlertDropdown
+        );
+
+
+        /* =========================
+           LOAD RECORDS
+        ========================== */
+
+        async function loadRecords() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_URL}/maintenance-records`
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Unable to load maintenance records."
+                    );
+
+                }
+
+
+                maintenanceRecords =
+                    await response.json();
+
+
+                updateSummary();
+
+                displayRecords(
+                    maintenanceRecords
+                );
+
+
+            } catch (error) {
+
+                console.error(error);
+
+
+                recordsTableBody.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="11"
+                            class="empty">
+
+                            Unable to load maintenance records.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+        }
+
+
+        /* =========================
+           SUMMARY
+        ========================== */
+
+        function updateSummary() {
+
+            const total =
+                maintenanceRecords.length;
+
+
+            const completed =
+                maintenanceRecords.filter(
+                    record =>
+                        record.status ===
+                        "Completed"
+                ).length;
+
+
+            const progress =
+                maintenanceRecords.filter(
+                    record =>
+                        record.status ===
+                        "In Progress"
+                ).length;
+
+
+            const totalCost =
+                maintenanceRecords.reduce(
+                    (sum, record) =>
+                        sum + Number(
+                            record.cost || 0
+                        ),
+                    0
+                );
+
+
+            document.getElementById(
+                "totalRecords"
+            ).textContent = total;
+
+
+            document.getElementById(
+                "completedRecords"
+            ).textContent = completed;
+
+
+            document.getElementById(
+                "progressRecords"
+            ).textContent = progress;
+
+
+            document.getElementById(
+                "totalCost"
+            ).textContent =
+                `Rs. ${totalCost.toLocaleString()}`;
+
+        }
+
+
+        /* =========================
+           DISPLAY RECORDS
+        ========================== */
+
+        function displayRecords(records) {
+
+            recordsTableBody.innerHTML = "";
+
+
+            if (records.length === 0) {
+
+                recordsTableBody.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="11"
+                            class="empty">
+
+                            No maintenance records found.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+                return;
+
+            }
+
+
+            records.forEach(record => {
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                const date =
+                    record.maintenance_date
+                        ? new Date(
+                            record.maintenance_date
+                        ).toLocaleString()
+                        : "-";
+
+
+                const alertText =
+                    record.alert_id
+                        ? `#${record.alert_id}`
+                        : "-";
+
+
+                const statusClass =
+                    record.status === "Completed"
+                        ? "completed"
+                        : "in-progress";
+
+
+                row.innerHTML = `
+
+                    <td>
+                        #${record.maintenance_record_id}
+                    </td>
+
+                    <td>
+                        <strong>
+                            ${record.bus_number}
+                        </strong>
+                    </td>
+
+                    <td>
+                        ${record.registration_number}
+                    </td>
+
+                    <td>
+                        ${date}
+                    </td>
+
+                    <td>
+                        ${alertText}
+                    </td>
+
+                    <td>
+                        ${record.maintenance_type}
+                    </td>
+
+                    <td>
+                        ${record.work_performed}
+                    </td>
+
+                    <td>
+                        ${record.technician_name}
+                    </td>
+
+                    <td>
+                        Rs. ${Number(record.cost).toLocaleString()}
+                    </td>
+
+                    <td>
+
+                        <span
+                            class="badge ${statusClass}">
+
+                            ${record.status}
+
+                        </span>
+
+                    </td>
+
+                    <td>
+                        ${record.notes || "-"}
+                    </td>
+
+                `;
+
+
+                recordsTableBody.appendChild(
+                    row
+                );
+
+            });
+
+        }
+
+
+        /* =========================
+           SAVE RECORD
+        ========================== */
+
+        maintenanceForm.addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const busId =
+                    Number(
+                        busSelect.value
+                    );
+
+
+                if (!busId) {
+
+                    showMessage(
+                        "Please select a bus.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                const alertValue =
+                    alertSelect.value;
+
+
+                const data = {
+
+                    bus_id: busId,
+
+                    alert_id:
+                        alertValue
+                            ? Number(alertValue)
+                            : null,
+
+                    maintenance_type:
+                        document.getElementById(
+                            "maintenanceType"
+                        ).value,
+
+                    work_performed:
+                        document.getElementById(
+                            "workPerformed"
+                        ).value.trim(),
+
+                    technician_name:
+                        document.getElementById(
+                            "technicianName"
+                        ).value.trim(),
+
+                    cost:
+                        Number(
+                            document.getElementById(
+                                "cost"
+                            ).value
+                        ),
+
+                    status:
+                        document.getElementById(
+                            "status"
+                        ).value,
+
+                    notes:
+                        document.getElementById(
+                            "notes"
+                        ).value.trim() || null
+
+                };
+
+
+                const saveButton =
+                    document.getElementById(
+                        "saveButton"
+                    );
+
+
+                saveButton.disabled = true;
+
+                saveButton.textContent =
+                    "Saving...";
+
+
+                try {
+
+                    const response =
+                        await fetch(
+
+                            `${API_URL}/maintenance-records`,
+
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        data
+                                    )
+                            }
+
+                        );
+
+
+                    const result =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            result.detail ||
+                            "Unable to save maintenance record."
+                        );
+
+                    }
+
+
+                    showMessage(
+                        "Maintenance record saved successfully.",
+                        "success"
+                    );
+
+
+                    maintenanceForm.reset();
+
+
+                    await loadAlerts();
+
+                    updateAlertDropdown();
+
+                    await loadRecords();
+
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    showMessage(
+                        error.message,
+                        "error"
+                    );
+
+                } finally {
+
+                    saveButton.disabled =
+                        false;
+
+                    saveButton.textContent =
+                        "Save Maintenance Record";
+
+                }
+
+            }
+        );
+
+
+        /* =========================
+           MESSAGE
+        ========================== */
+
+        function showMessage(
+            text,
+            type
+        ) {
+
+            formMessage.textContent =
+                text;
+
+            formMessage.className =
+                `message ${type}`;
+
+        }
+
+
+        /* =========================
+           FILTERS
+        ========================== */
+
+        const searchInput =
+            document.getElementById(
+                "searchInput"
+            );
+
+        const typeFilter =
+            document.getElementById(
+                "typeFilter"
+            );
+
+        const statusFilter =
+            document.getElementById(
+                "statusFilter"
+            );
+
+
+        function filterRecords() {
+
+            const search =
+                searchInput.value
+                    .toLowerCase()
+                    .trim();
+
+
+            const type =
+                typeFilter.value;
+
+
+            const status =
+                statusFilter.value;
+
+
+            const filtered =
+                maintenanceRecords.filter(
+                    record => {
+
+                        const matchesSearch =
+
+                            String(
+                                record.bus_number
+                            )
+                                .toLowerCase()
+                                .includes(search)
+
+                            ||
+
+                            String(
+                                record.registration_number
+                            )
+                                .toLowerCase()
+                                .includes(search);
+
+
+                        const matchesType =
+                            type === "" ||
+                            record.maintenance_type ===
+                                type;
+
+
+                        const matchesStatus =
+                            status === "" ||
+                            record.status ===
+                                status;
+
+
+                        return (
+                            matchesSearch &&
+                            matchesType &&
+                            matchesStatus
+                        );
+
+                    }
+                );
+
+
+            displayRecords(
+                filtered
+            );
+
+        }
+
+
+        searchInput.addEventListener(
+            "input",
+            filterRecords
+        );
+
+
+        typeFilter.addEventListener(
+            "change",
+            filterRecords
+        );
+
+
+        statusFilter.addEventListener(
+            "change",
+            filterRecords
+        );
+
+
+        /* =========================
+           PAGE LOAD
+        ========================== */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            async function() {
+
+                await loadBuses();
+
+                await loadAlerts();
+
+                await loadRecords();
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>
