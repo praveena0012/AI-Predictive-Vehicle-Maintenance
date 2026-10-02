@@ -293,6 +293,15 @@
                 align-items: flex-start;
             }
         }
+        .logout-link {
+    color: #ffb4b4 !important;
+    margin-top: 20px;
+}
+
+.logout-link:hover {
+    background: #b42318 !important;
+    color: white !important;
+}
 
     </style>
 
@@ -346,6 +355,9 @@
         <a href="reports.html">
             Reports
         </a>
+      <a href="#" class="logout-link" onclick="logoutUser(); return false;">
+    Logout
+</a>
 
     </div>
 
@@ -636,6 +648,102 @@
 
     const API_URL =
         "http://127.0.0.1:8000";
+        const authToken =
+    localStorage.getItem("buspredict_token");
+
+
+async function checkAuthentication() {
+
+    if (!authToken) {
+
+        window.location.href =
+            "login.html";
+
+        return false;
+    }
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/auth/check`,
+            {
+                headers: {
+                    "Authorization":
+                        `Bearer ${authToken}`
+                }
+            }
+        );
+
+        if (!response.ok) {
+
+            localStorage.removeItem(
+                "buspredict_token"
+            );
+
+            localStorage.removeItem(
+                "buspredict_username"
+            );
+
+            window.location.href =
+                "login.html";
+
+            return false;
+        }
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "Authentication check failed:",
+            error
+        );
+
+        window.location.href =
+            "login.html";
+
+        return false;
+    }
+}
+
+
+async function logoutUser() {
+
+    try {
+
+        await fetch(
+            `${API_URL}/logout`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Authorization":
+                        `Bearer ${authToken}`
+                }
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Logout request failed:",
+            error
+        );
+
+    } finally {
+
+        localStorage.removeItem(
+            "buspredict_token"
+        );
+
+        localStorage.removeItem(
+            "buspredict_username"
+        );
+
+        window.location.href =
+            "login.html";
+    }
+}
 
 
     let buses = [];
@@ -654,27 +762,42 @@
     async function loadDashboard() {
 
         try {
+            const requestOptions = {
 
-            const responses =
-                await Promise.all([
+    headers: {
+        "Authorization":
+            `Bearer ${authToken}`
+    }
 
-                    fetch(
-                        `${API_URL}/buses`
-                    ),
+};
 
-                    fetch(
-                        `${API_URL}/inspections`
-                    ),
 
-                    fetch(
-                        `${API_URL}/alerts`
-                    ),
+const responses =
+    await Promise.all([
 
-                    fetch(
-                        `${API_URL}/maintenance-records`
-                    )
+        fetch(
+            `${API_URL}/buses`,
+            requestOptions
+        ),
 
-                ]);
+        fetch(
+            `${API_URL}/inspections`,
+            requestOptions
+        ),
+
+        fetch(
+            `${API_URL}/alerts`,
+            requestOptions
+        ),
+
+        fetch(
+            `${API_URL}/maintenance-records`,
+            requestOptions
+        )
+
+    ]);
+
+            
 
 
             for (const response of responses) {
@@ -1007,17 +1130,24 @@
        PAGE LOAD
     ================================================== */
 
-    document.addEventListener(
+   document.addEventListener(
 
-        "DOMContentLoaded",
+    "DOMContentLoaded",
 
-        function() {
+    async function() {
+
+        const authenticated =
+            await checkAuthentication();
+
+        if (authenticated) {
 
             loadDashboard();
 
         }
 
-    );
+    }
+
+);
 
 </script>
 

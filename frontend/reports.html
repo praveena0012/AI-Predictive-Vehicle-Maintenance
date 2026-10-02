@@ -406,6 +406,15 @@
                 border: 1px solid #ddd;
             }
         }
+        .logout-link {
+    color: #ffb4b4 !important;
+    margin-top: 20px;
+}
+
+.logout-link:hover {
+    background: #b42318 !important;
+    color: white !important;
+}
     </style>
 </head>
 
@@ -454,7 +463,9 @@
         <a href="reports.html" class="active">
             Reports
         </a>
-
+<a href="#" class="logout-link" onclick="logoutUser(); return false;">
+    Logout
+</a>
     </div>
 
 </div>
@@ -1532,7 +1543,7 @@
     );
 
 </script>
-
+<script src="auth.js"></script>
 </body>
 
 </html>

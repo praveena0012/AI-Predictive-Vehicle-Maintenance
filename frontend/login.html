@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BusPredict - Login</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 12px;
+            padding: 35px;
+            box-shadow: 0 3px 18px #ccd5e5;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 30px;
+            font-weight: bold;
+            color: #203b6b;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #60708d;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            margin-bottom: 25px;
+            text-align: center;
+            color: #172b4d;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 15px;
+            color: #172b4d;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 7px;
+            border: 1px solid #ccd5e5;
+            border-radius: 7px;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #31558f;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 13px;
+
+            border: none;
+            border-radius: 7px;
+
+            background: #e87922;
+            color: white;
+
+            font-weight: bold;
+            font-size: 14px;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #cf6418;
+        }
+
+        button:disabled {
+            background: #aeb8c8;
+            cursor: not-allowed;
+        }
+
+        #message {
+            margin-top: 18px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .error {
+            display: block !important;
+            background: #fdeaea;
+            color: #c62828;
+        }
+
+        .success {
+            display: block !important;
+            background: #e8f5e9;
+            color: #16803c;
+        }
+
+        .footer {
+            margin-top: 25px;
+            text-align: center;
+            color: #60708d;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-container">
+
+    <div class="login-card">
+
+        <div class="logo">
+            BusPredict
+        </div>
+
+        <div class="subtitle">
+            AI Predictive Maintenance
+        </div>
+
+        <h2>Authorized User Login</h2>
+
+        <form id="loginForm">
+
+            <label>
+                Username
+                <input
+                    id="username"
+                    type="text"
+                    required
+                    autocomplete="username"
+                >
+            </label>
+
+            <label>
+                Password
+                <input
+                    id="password"
+                    type="password"
+                    required
+                    autocomplete="current-password"
+                >
+            </label>
+
+            <button
+                id="loginButton"
+                type="submit"
+            >
+                Login
+            </button>
+
+        </form>
+
+        <div id="message"></div>
+
+        <div class="footer">
+            Authorized BusPredict users only
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    const API_URL = "http://127.0.0.1:8000";
+
+    const loginForm =
+        document.getElementById("loginForm");
+
+    const loginButton =
+        document.getElementById("loginButton");
+
+    const message =
+        document.getElementById("message");
+
+
+    /*
+     * If the user already has a token,
+     * go directly to the dashboard.
+     */
+    if (localStorage.getItem("buspredict_token")) {
+
+        window.location.href =
+            "dashboard.html";
+
+    }
+
+
+    loginForm.addEventListener(
+        "submit",
+
+        async function(event) {
+
+            event.preventDefault();
+
+            loginButton.disabled = true;
+            loginButton.textContent =
+                "Logging in...";
+
+            message.className = "";
+            message.style.display = "none";
+
+
+            const username =
+                document.getElementById(
+                    "username"
+                ).value.trim();
+
+            const password =
+                document.getElementById(
+                    "password"
+                ).value;
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_URL}/login`,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                username: username,
+                                password: password
+                            })
+                        }
+                    );
+
+
+                const result =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        result.detail ||
+                        "Login failed."
+                    );
+
+                }
+
+
+                /*
+                 * Save authentication details
+                 * in the browser.
+                 */
+                localStorage.setItem(
+                    "buspredict_token",
+                    result.token
+                );
+
+                localStorage.setItem(
+                    "buspredict_username",
+                    result.username
+                );
+
+
+                message.className =
+                    "success";
+
+                message.textContent =
+                    "Login successful. Opening dashboard...";
+
+
+                setTimeout(
+                    function() {
+
+                        window.location.href =
+                            "dashboard.html";
+
+                    },
+                    500
+                );
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                message.className =
+                    "error";
+
+                message.textContent =
+                    error.message;
+
+
+            } finally {
+
+                loginButton.disabled = false;
+
+                loginButton.textContent =
+                    "Login";
+
+            }
+
+        }
+    );
+
+</script>
+
+</body>
+
+</html>
