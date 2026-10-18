@@ -17,3 +17,20 @@ The browser calls `http://127.0.0.1:8000/predict`. The API also exposes `/docs` 
 - Add authentication and role-based access.
 - Consume the API from JavaFX, or package the prediction service behind a controlled integration layer.
 - Evaluate with stratified cross-validation and prioritize recall for Critical Issue.
+
+
+## Project Features
+
+BusPredict is a demonstration project that explores how artificial intelligence can support predictive maintenance for buses.
+
+The prototype includes:
+
+- **Machine Learning:** Uses a scikit-learn model to generate maintenance predictions.
+- **Prediction API:** Uses FastAPI to provide an endpoint for prediction requests.
+- **Web Dashboard:** Provides a browser-based interface for interacting with the prediction service.
+- **Sample Dataset:** Uses sample data for demonstration purposes.
+- **Future Improvements:** Identifies opportunities to integrate validated datasets, a database, authentication, and further model evaluation.
+
+## Project Goal
+
+The goal of BusPredict is to help identify potential vehicle maintenance issues and support maintenance planning. The prototype requires further validation with suitable real-world data before its predictions can be relied upon in operational settings.
